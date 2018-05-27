@@ -7,6 +7,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
@@ -31,6 +32,21 @@ public class MainActivity extends AppCompatActivity {
         String gifUrl = imageAdapter.getFullPosition(position);
         showNextActivity(gifUrl);
         Toast.makeText(MainActivity.this, "" + position, Toast.LENGTH_SHORT).show();
+      }
+    });
+
+    gridView.setOnScrollListener(new AbsListView.OnScrollListener(){
+      @Override
+      public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
+      {
+        if(firstVisibleItem + visibleItemCount >= totalItemCount){
+          imageAdapter.didReachScrollBottom(totalItemCount);
+        }
+      }
+
+      @Override
+      public void onScrollStateChanged(AbsListView view, int scrollState){
+
       }
     });
 

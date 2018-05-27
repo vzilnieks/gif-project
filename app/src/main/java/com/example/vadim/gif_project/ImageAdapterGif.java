@@ -17,6 +17,7 @@ import com.giphy.sdk.core.network.api.GPHApi;
 import com.giphy.sdk.core.network.api.GPHApiClient;
 import com.giphy.sdk.core.network.response.ListMediaResponse;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
@@ -30,21 +31,29 @@ public class ImageAdapterGif extends BaseAdapter {
   private GPHApi mClient;
   private List<Media> mData;
 
+  private int requestCount = 30;
+  private int offset = 0;
+  private boolean requestInProgress = false;
+
   public ImageAdapterGif(Context c) {
     mContext = c;
+    mData = new ArrayList<>();
     mClient = new GPHApiClient("UX9CCDUOQHrkLIA3bJnIpkbp2UgWFTqB");
     getTrendingGifs();
 
   }
 
   private void getTrendingGifs() {
-    mClient.trending(MediaType.gif, null, null, null, new CompletionHandler<ListMediaResponse>() {
+    mClient.trending(MediaType.gif, requestCount, offset, null, new CompletionHandler<ListMediaResponse>() {
       @Override
       public void onComplete(ListMediaResponse result, Throwable e) {
         if (result == null) {
           // Do what you want to do with the error
         } else {
-          mData = result.getData();
+//          mData = result.getData();
+
+          mData.addAll(result.getData());
+          requestInProgress = false;
 
           ((MainActivity)mContext).runOnUiThread(new Runnable() {
             @Override
@@ -63,6 +72,19 @@ public class ImageAdapterGif extends BaseAdapter {
         }
       }
     });
+  }
+
+  public void didReachScrollBottom(int lastPosition) {
+
+    if(requestInProgress) {
+      return;
+    }
+
+    if(offset <= lastPosition) {
+      requestInProgress = true;
+      offset += requestCount;
+      getTrendingGifs();
+    }
   }
 
   @Override
